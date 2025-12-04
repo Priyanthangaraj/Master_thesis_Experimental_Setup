@@ -1,0 +1,96 @@
+
+---
+
+## 📡 System Overview
+Each radar node includes:
+
+- TI **AWR1843** FMCW mmWave radar  
+- Raspberry Pi 4 running **Ubuntu 20.04**  
+- Custom **mmWave .cfg** for high-resolution 4 GHz bandwidth  
+- ROS package `ti_mmwave_rospkg` for real-time point cloud streaming  
+- Remote access via SSH + VNC  
+- Synchronized experiment execution for all 3 radars  
+
+---
+
+## 🔧 Installation & Setup
+Detailed setup instructions are available in:
+
+- `AWR1843_Radar_Installation_Guide/`
+- `VNC_Setup_on_Raspberry_Pi/`
+
+These guides include:
+
+- Flashing Ubuntu 20.04  
+- Installing ROS Noetic (minimal setup)  
+- Configuring UART communication  
+- Launching radar nodes  
+- Recording ROS bag files  
+- Converting `.bag → .txt` format  
+
+---
+
+## 📁 Dataset Description
+A detailed explanation is provided in `DATASET.md`, including:
+
+- Folder structure  
+- Naming convention  
+- Sensor orientation (yaw 0°, ±10°, +20°)  
+- Indoor vs. outdoor scenes  
+- Drone/human trajectories  
+- Contents of `.txt` files  
+- Radar identifiers (O, L, R)  
+
+---
+Experimental Scenarios Included
+The dataset contains:
+
+- Single-drone trajectories
+  - Circular  
+  - Diamond / rhombus  
+  - Straight-line motion  
+
+- Multi-drone scenarios  
+  - Two drones flying simultaneously  
+  - Overlapping trajectories  
+  - Varying distances & angles  
+
+- Human motion experiments
+  - Single person walking  
+  - Two persons crossing paths  
+  - Mixed drone + human scenes  
+
+- Calibration recordings
+  - Static reflectors  
+  - Yaw variations: `0°`, `10° inward`, `10° outward`, `20° inward`
+
+
+Dataset Download
+The dataset is provided as `.zip` archives inside the `datasets/` folder, organized by:
+
+- Environment  
+- Radar yaw configuration  
+- Motion type (drone/human)  
+
+Upload your `.zip` files to GitHub or a cloud service.  
+Then update the links below:
+
+
+Each file includes:
+  x, y, z, range, doppler, doppler_bin, angle, SNR, noise, timestamp
+
+
+These logs can be used for:
+  - Multi-radar calibration  
+  - Data fusion  
+  - Target tracking  
+  - Clutter analysis  
+  - Cross-sensor alignment  
+
+  
+Reproducing Experiments
+  1. Load the provided `.cfg` file into each radar using ROS.  
+  2. Arrange the radars in a straight line with ~0.65 m spacing.  
+  3. Select trajectory script (drone/human).  
+  4. Record point clouds using `rosbag`.  
+  5. Convert bags to text format.  
