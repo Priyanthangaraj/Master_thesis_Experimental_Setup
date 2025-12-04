@@ -1,0 +1,114 @@
+Raspberry Pi mmWave Radar Setup Guide (Ubuntu 20.04 + ROS Noetic + AWR1843)
+
+This guide describes the complete workflow for preparing a Raspberry Pi, installing Ubuntu 20.04, configuring ROS Noetic, adding the TI AWR1843 radar ROS package, and recording radar data.
+
+Step 1 — Flash Ubuntu 20.04 to the SD Card
+        Download Raspberry Pi Imager for Windows.
+        Insert the SD card using a card reader and format if necessary.
+        Open the Imager and select:
+        Device: Raspberry Pi 4 / 5
+        OS: Ubuntu 20.04 (General-purpose)
+        Storage: Your SD card
+        In the configuration menu, enter your Wi-Fi SSID and password (recommended for hotspot use).
+        Flash the image to the SD card.
+
+
+Step 2 — Boot the Raspberry Pi
+        Insert the SD card into the Pi and connect keyboard, mouse, and monitor.
+        Power on the device and log in with the default or user-defined credentials.
+
+
+Step 3 — Configure Wi-Fi (Hotspot Mode)
+        Create a hotspot on your laptop/mobile using the same SSID and password configured during flashing.
+        On the Pi, edit the netplan config: 
+          sudo nano /etc/netplan/50-cloud-init.yaml
+        Add/update the Wi-Fi password under the defined network (Fig. 1 if referenced in documentation).
+        Apply the changes:
+          sudo netplan apply
+
+
+Step 4 — Install Desktop Environment
+        sudo apt update
+        sudo apt upgrade -y       # reboot if necessary
+        sudo apt install ubuntu-desktop -y
+        sudo reboot
+      This provides a full GUI environment for easier debugging.
+
+
+Step 5 — Install ROS Noetic (ROS-Base)
+        Follow the official ROS Noetic installation guide.
+        Complete sections 1.2 and 1.3 (sources & keys).
+        In 1.4, install ros-noetic-ros-base.
+        If package errors occur:
+          sudo apt update
+        Perform all steps in 1.5, except the optional zsh setup.
+        Complete 1.6 to initialize ROS environment variables.
+
+Step 6 — Create a Catkin Workspace
+        Follow ROS official instructions (LINK):
+          mkdir -p ~/catkin_ws/src
+          cd ~/catkin_ws
+          catkin_make
+
+
+Step 7 — Add Radar ROS Package
+        Download the radar package ZIP (provided in repository/releases).
+        Extract it and copy the contents of src/ into:
+          ~/catkin_ws/src/
+        Build the workspace:
+          cd ~/catkin_ws
+          catkin_make
+
+
+Step 8 — Resolve Common Build Errors
+        C/C++ compiler issues
+          sudo apt update
+          sudo apt install g++
+        PCL-related errors
+          sudo apt install libpcl-dev
+          sudo apt install ros-noetic-pcl-ros
+        Additionally, update CMakeLists.txt:
+        At the top of the file inside ti_mmwave_rospkg folder, add:
+          set(CMAKE_CXX_STANDARD 17)
+        Rebuild:
+          cd ~/catkin_ws
+          catkin_make
+
+
+Step 9 — Enable rosbag Recording in Launch File
+        Open:
+          catkin_ws/src/ti_mmwave_rospkg/launch/awr1843boost_test.launch
+        Add the following node (ensure a space before /ti_mmwave):
+          <!-- Enable rosbag recording -->
+          <node name="bag_record" pkg="rosbag" type="record"
+                args="record -O /home/rootname /ti_mmwave/radar_scan" />
+
+
+Step 10 — Launch the Radar Node
+          Before launching, ensure system time is synced (connect to Wi-Fi).
+          Connect and power the radar module.
+          Navigate to the launch directory:
+            cd ~/catkin_ws/src/ti_mmwave_rospkg/launch/
+          Launch:
+            roslaunch awr1843boost_test.launch
+          If an error occurs, close the terminal and repeat the launch.
+          Radar data is now being recorded into a .bag file.
+
+
+Step 11 — Convert .bag to .txt
+          Use the provided Python script:
+            python3 /home/ACPS/Documents/code.py \
+                    /home/ACPS/Documents/filename.bag \
+                    filename.txt \
+                    /ti_mmwave/radar_scan
+          Where:
+          filename.bag = recorded radar data
+          filename.txt = user-defined output file
+
+
+User Credentials (Example Setup)
+          | Radar Position | Username | Password |
+          | -------------- | -------- | -------- |
+          | Middle Radar   | ACPS     | 1234     |
+          | Right Radar    | rpi1     | 1234     |
+          | Left Radar     | rpi2     | 1234     |
