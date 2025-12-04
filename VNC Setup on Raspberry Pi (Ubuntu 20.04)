@@ -1,0 +1,96 @@
+This guide describes how to install and configure TigerVNC on a Raspberry Pi running Ubuntu 20.04, with remote access via SSH tunneling (PuTTY) and a VNC viewer.
+
+Important: Ensure no VPN is active on your laptop during the setup.
+Reference: UMich VNC Tunnel Guide
+
+1. Prepare the Raspberry Pi
+  Flash Ubuntu 20.04 onto the SD card.
+  Insert the SD card into the Raspberry Pi.
+  Connect a keyboard, mouse, and display.
+  Boot and log in to Ubuntu.
+
+
+2. Update System Packages
+  sudo apt update && sudo apt upgrade -y
+
+
+3. Install XFCE Desktop Environment
+    sudo apt install xfce4 xfce4-goodies -y
+    sudo reboot
+  This enables a lightweight GUI suitable for VNC access.
+
+
+4. Configure Wi-Fi (Mobile Hotspot)
+  Edit the netplan file:
+    sudo nano /etc/netplan/50-cloud-init.yaml
+  Enter your hotspot’s SSID and password, save, then apply:
+    sudo netplan apply
+  Your Raspberry Pi should now connect to your phone/laptop hotspot.
+
+5. Optional: Install Firefox Browser
+  sudo apt install firefox -y
+
+6. Install TigerVNC Server
+    sudo apt install tigervnc-standalone-server tigervnc-common -y
+    sudo apt update
+    sudo apt install xfce4 xfce4-goodies xfce4-terminal -y
+  When prompted, select lightdm as the display manager.
+
+7. Configure VNC Startup Script
+  Edit the VNC startup file:
+    nano ~/.vnc/xstartup
+  Paste the following:
+    #!/bin/bash
+    unset SESSION_MANAGER
+    unset DBUS_SESSION_BUS_ADDRESS
+    xrdb $HOME/.Xresources
+    startxfce4 &
+  Make it executable:
+    chmod +x ~/.vnc/xstartup
+
+
+8. Enable SSH Password Authentication
+  Edit:
+    sudo nano /etc/ssh/sshd_config
+  Set:
+    PasswordAuthentication yes
+    PubkeyAuthentication yes
+  Restart SSH:
+    sudo systemctl restart ssh
+
+
+9. Find the Raspberry Pi IP Address
+  Connect your laptop and the Raspberry Pi to the same hotspot.
+  On Windows, open Command Prompt:
+    ipconfig
+  Find your laptop's IP address.
+  List devices on the network:
+    arp -a
+  Look for an entry similar to:
+    b8:27:eb:xx:xx:xx
+    dc:a6:32:xx:xx:xx
+  These correspond to Raspberry Pi MAC prefixes → this is your Pi’s IP address.
+
+10. Configure PuTTY SSH Tunnel for VNC
+    Open PuTTY → enter Pi's IP address → select SSH.
+    Navigate to:
+      Connection → SSH → Tunnels
+    Add the tunnel:
+      Source port: 5901
+      Destination: localhost:5901
+    Click Add, save the session, then Open.
+    Enter Pi username and password.
+
+
+11. Start VNC Server on Raspberry Pi
+    Set the VNC password:
+      vncpasswd
+    Start the server:
+      vncserver
+    This creates display :1 (port 5901).
+
+12. Connect Using VNC Viewer
+    Open VNC Viewer and connect to:
+      localhost:1
+    Enter the VNC password you set (e.g., 123456).
+    You now have full remote desktop access to your Raspberry Pi.
